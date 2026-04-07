@@ -1,0 +1,72 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter analyze
+
+## exception
+
+_Exception: Exception: analysis server exited with code -9 and output:
+[stdout] {"event":"server.connected","params":{"version":"1.38.0","pid":305564}}
+[stdout] {"id":"1"}
+[stdout] {"event":"analysis.errors","params":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/pubspec.yaml","errors":[]}}
+[stdout] {"event":"analysis.errors","params":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/analysis_options.yaml","errors":[]}}
+[stdout] {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
+[stdout] {"event":"analysis.errors","params":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/models/question.dart","errors":[]}}
+[stdout] {"event":"analysis.errors","params":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/models/learning_document.dart","errors":[{"severity":"ERROR","type":"COMPILE_TIME_ERROR","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/models/learning_document.dart","offset":156,"length":7,"startLine":7,"startColumn":14,"endLine":7,"endColumn":21},"message":"The name 'Keyword' isn't a type, so it can't be used as a type argument.","correction":"Try correcting the name to an existing type, or defining a type named 'Keyword'.","code":"non_type_as_type_argument","url":"https://dart.dev/diagnostics/non_type_as_type_argument","hasFix":false},{"severity":"ERROR","type":"COMPILE_TIME_ERROR","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/models/learning_document.dart","offset":571,"length":7,"startLine":26,"startColumn":10,"endLine":26,"endColumn":17},"message":"The name 'Keyword' isn't a type, so it can't be used as a type argument.","correction":"Try correcting the name to an existing type, or defining a type named 'Keyword'.","code":"non_type_as_type_argument","url":"https://dart.dev/diagnostics/non_type_as_type_argument","hasFix":false}]}}
+[stdout] {"event":"analysis.errors","params":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/models/keyword.dart","errors":[]}}
+[stdout] {"event":"analysis.errors","params":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download_web.dart","errors":[{"severity":"INFO","type":"HINT","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download_web.dart","offset":59,"length":19,"startLine":3,"startColumn":1,"endLine":3,"endColumn":20},"message":"'dart:html' is deprecated and shouldn't be used. Use package:web and dart:js_interop instead.","correction":"Try replacing the use of the deprecated member with the replacement.","code":"deprecated_member_use","url":"https://dart.dev/diagnostics/deprecated_member_use","hasFix":false},{"severity":"WARNING","type":"STATIC_WARNING","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download_web.dart","offset":224,"length":6,"startLine":8,"startColumn":9,"endLine":8,"endColumn":15},"message":"The value of the local variable 'anchor' isn't used.","correction":"Try removing the variable or using it.","code":"unused_local_variable","url":"https://dart.dev/diagnostics/unused_local_variable","hasFix":false}]}}
+[stdout] {"id":"2"}
+[stdout] {"event":"analysis.errors","params":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download_none.dart","errors":[]}}
+[stdout] {"event":"analysis.errors","params":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download.dart","errors":[{"severity":"ERROR","type":"SYNTACTIC_ERROR","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download.dart","offset":179,"length":6,"startLine":7,"startColumn":5,"endLine":7,"endColumn":11},"message":"Expected to find ';'.","code":"expected_token","hasFix":false},{"severity":"ERROR","type":"COMPILE_TIME_ERROR","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download.dart","offset":201,"length":4,"startLine":7,"startColumn":27,"endLine":7,"endColumn":31},"message":"The name 'html' isn't a type, so it can't be used in an 'as' expression.","correction":"Try changing the name to the name of an existing type, or creating a type with the name 'html'.","code":"cast_to_non_type","url":"https://dart.dev/diagnostics/cast_to_non_type","hasFix":false},{"severity":"ERROR","type":"COMPILE_TIME_ERROR","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download.dart","offset":179,"length":6,"startLine":7,"startColumn":5,"endLine":7,"endColumn":11},"message":"Undefined name 'import'.","correction":"Try correcting the name to one that is defined, or defining the name.","code":"undefined_identifier","url":"https://dart.dev/diagnostics/undefined_identifier","hasFix":false},{"severity":"ERROR","type":"COMPILE_TIME_ERROR","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download.dart","offset":224,"length":4,"startLine":8,"startColumn":18,"endLine":8,"endColumn":22},"message":"Undefined name 'html'.","correction":"Try correcting the name to one that is defined, or defining the name.","code":"undefined_identifier","url":"https://dart.dev/diagnostics/undefined_identifier","hasFix":false},{"severity":"ERROR","type":"COMPILE_TIME_ERROR","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download.dart","offset":260,"length":4,"startLine":9,"startColumn":17,"endLine":9,"endColumn":21},"message":"Undefined name 'html'.","correction":"Try correcting the name to one that is defined, or defining the name.","code":"undefined_identifier","url":"https://dart.dev/diagnostics/undefined_identifier","hasFix":false},{"severity":"ERROR","type":"COMPILE_TIME_ERROR","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download.dart","offset":319,"length":4,"startLine":10,"startColumn":20,"endLine":10,"endColumn":24},"message":"Undefined name 'html'.","correction":"Try correcting the name to one that is defined, or defining the name.","code":"undefined_identifier","url":"https://dart.dev/diagnostics/undefined_identifier","hasFix":false},{"severity":"ERROR","type":"COMPILE_TIME_ERROR","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download.dart","offset":413,"length":4,"startLine":13,"startColumn":5,"endLine":13,"endColumn":9},"message":"Undefined name 'html'.","correction":"Try correcting the name to one that is defined, or defining the name.","code":"undefined_identifier","url":"https://dart.dev/diagnostics/undefined_identifier","hasFix":false},{"severity":"WARNING","type":"STATIC_WARNING","location":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/utils/download.dart","offset":310,"length":6,"startLine":10,"startColumn":11,"endLine":10,"endColumn":17},"message":"The value of the local variable 'anchor' isn't used.","correction":"Try removing the variable or using it.","code":"unused_local_variable","url":"https://dart.dev/diagnostics/unused_local_variable","hasFix":false}]}}
+[stdout] {"event":"analysis.errors","params":{"file":"/home/admin/.openclaw/workspace-nvidia-analyst/learning_search/lib/api/client.dart","errors":[]}}
+
+```
+```
+
+## flutter doctor
+
+```
+[!] Flutter (Channel stable, 3.29.0, on Alibaba Cloud Linux 3.2104 U12.3 (OpenAnolis Edition) 5.10.134-19.2.al8.x86_64, locale en_US.UTF-8) [85ms]
+    • Flutter version 3.29.0 on channel stable at /home/admin/flutter
+    ! The flutter binary is not on your path. Consider adding /home/admin/flutter/bin to your path.
+    ! The dart binary is not on your path. Consider adding /home/admin/flutter/bin to your path.
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 35c388afb5 (1 year, 2 months ago), 2025-02-10 12:48:41 -0800
+    • Engine revision f73bfc4522
+    • Dart version 3.7.0
+    • DevTools version 2.42.2
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly to perform update checks and upgrades.
+
+[✗] Android toolchain - develop for Android devices [26ms]
+    ✗ Unable to locate Android SDK.
+      Install Android Studio from: https://developer.android.com/studio/index.html
+      On first launch it will assist you in installing the Android SDK components.
+      (or visit https://flutter.dev/to/linux-android-setup for detailed instructions).
+      If the Android SDK has been installed to a custom location, please use
+      `flutter config --android-sdk` to update to that location.
+
+
+[✓] Chrome - develop for the web [16ms]
+    • Chrome at google-chrome
+
+[✓] Linux toolchain - develop for Linux desktop [663ms]
+    • clang version 15.0.7 ( 15.0.7-1.0.3.al8)
+    • cmake version 3.26.5
+    • ninja version 1.8.2
+    • pkg-config version 1.4.2
+
+[!] Android Studio (not installed) [7ms]
+    • Android Studio not found; download from https://developer.android.com/studio/index.html
+      (or visit https://flutter.dev/to/linux-android-setup for detailed instructions).
+
+[✓] Connected device (2 available) [333ms]
+    • Linux (desktop) • linux  • linux-x64      • Alibaba Cloud Linux 3.2104 U12.3 (OpenAnolis Edition) 5.10.134-19.2.al8.x86_64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 145.0.7632.159
+
+[✓] Network resources [581ms]
+    • All expected network resources are available.
+
+! Doctor found issues in 3 categories.
+```
