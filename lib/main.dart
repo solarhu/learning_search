@@ -135,6 +135,75 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // 处理用户自定义关键词
+  Future<void> _onCustomSelection(String keyword) async {
+    // 弹出输入框让用户添加标注说明
+    final TextEditingController noteController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('自定义标注说明'),
+        content: TextField(
+          controller: noteController,
+          decoration: const InputDecoration(
+            labelText: '标注说明（可选）',
+            hintText: '比如："我想了解它在工程实践中的应用"，留空则默认解释',
+          ),
+          maxLines: 2,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _doExplainCustom(keyword, noteController.text.trim());
+            },
+            child: const Text('获取解释'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _doExplainCustom(String keyword, String userNote) async {
+    if (_explanations.containsKey(keyword)) {
+      _showExplanationDialog(keyword, _explanations[keyword]!);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final explanation = await _searchService
+          .explainCustomKeyword(keyword, userNote);
+      setState(() {
+        _explanations[keyword] = explanation;
+        // 已经在searchService里加入explainedKeywords了
+        // 更新currentKeywords
+        _currentKeywords = _searchService.explainedKeywords
+            .where((k) => k.explanation == null)
+            .map((k) => k.text)
+            .toList();
+        _isLoading = false;
+      });
+      _showExplanationDialog(keyword, explanation);
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('获取解释失败: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _generateDocument() async {
     if (_searchService.currentQuestion == null) return;
 
@@ -333,6 +402,7 @@ class _HomePageState extends State<HomePage> {
                         text: _currentAnswer!,
                         keywords: _currentKeywords,
                         onKeywordTap: _onKeywordTap,
+                        onCustomSelection: _onCustomSelection,
                       ),
                       if (_explanations.isNotEmpty) ...[
                         const SizedBox(height: 20),
@@ -368,6 +438,7 @@ class _HomePageState extends State<HomePage> {
       markdown: _documentMarkdown!,
       mindmap: _documentMindmap!,
       apiClient: _apiClient,
+      onCustomSelection: _onCustomSelection,
     );
   }
 }
