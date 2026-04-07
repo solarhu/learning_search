@@ -41,6 +41,8 @@ build/web/
 # Local environment variables
 .env
 .env.*
+server/.env
+server/.env.*
 
 # MacOS files
 *.DS_Store

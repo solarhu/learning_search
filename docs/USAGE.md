@@ -27,8 +27,17 @@ go build -o server main.go
 
 ### 2. 配置 API Key
 
+**两种配置方式**：
+
+#### 方式一：配置文件（推荐）
 ```bash
-# 设置 OpenAI API Key
+cd server
+cp .env.example .env
+# 编辑 .env 文件，填入你的 OPENAI_API_KEY
+```
+
+#### 方式二：环境变量
+```bash
 export OPENAI_API_KEY=your-openai-api-key-here
 ```
 
@@ -120,7 +129,7 @@ flutter build ohos --release
 ## 开发者部署 Checklist
 
 - [ ] 启动 Go 后端
-- [ ] 设置 `OPENAI_API_KEY` 环境变量
+- [ ] 配置 `OPENAI_API_KEY`（推荐用 `server/.env` 文件）
 - [ ] 构建 Flutter Web 并部署
 - [ ] （可选）构建鸿蒙安装包
 - [ ] 配置 Nginx 反向代理后端 API（如果需要跨域）
