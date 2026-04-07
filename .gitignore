@@ -1,0 +1,50 @@
+# Miscellaneous
+*.log
+*.rar
+*.zip
+*.tar.gz
+*.z
+build/
+.dart_tool/
+.packages
+.pub/
+.idea/
+*.iml
+*.ipr
+*.swp
+*~
+*.sublime-project
+*.sublime-workspace
+.vscode/
+.fvm/
+
+# IntelliJ files
+.idea/
+*.iml
+
+# Android files
+*.jks
+*.keystore
+build/
+android/app/build/
+android/.gradle/
+
+# iOS files
+ios/Pods/
+ios/.symlinks/
+ios/xcuserdata/
+ios/Runner.xcworkspace/
+
+# Web build
+build/web/
+
+# Local environment variables
+.env
+.env.*
+
+# MacOS files
+*.DS_Store
+
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
