@@ -1,0 +1,23 @@
+# Flutter HarmonyOS project configuration
+name: learning_search
+description: "递进式学习搜索工具 - HarmonyOS build"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.7.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  http: ^1.2.0
+  flutter_markdown: ^0.6.20+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

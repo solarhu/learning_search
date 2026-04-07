@@ -48,3 +48,9 @@ build/web/
 # Flutter
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# HarmonyOS/OpenHarmony
+ohos/build/
+ohos/.ohos
+*.hap
+*.app
