@@ -56,3 +56,6 @@ ohos/build/
 ohos/.ohos
 *.hap
 *.app
+
+# Docker
+docker.overcommit
