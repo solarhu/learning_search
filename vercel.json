@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "flutter pub get && flutter build web --release",
+  "buildCommand": "./vercel-build.sh",
   "outputDirectory": "build/web",
   "framework": null,
   "rewrites": [
