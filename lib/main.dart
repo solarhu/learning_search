@@ -1,10 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:html' as html;
 import 'api/client.dart';
 import 'domain/search_service.dart';
 import 'models/keyword.dart';
 import 'widgets/keyword_text.dart';
 import 'widgets/document_view.dart';
+
+String getApiBaseUrl() {
+  // Web 环境：如果是部署在服务器上，自动使用当前域名和端口
+  if (kIsWeb) {
+    final protocol = html.window.location.protocol;
+    final host = html.window.location.host;
+    // 如果是本地开发（localhost），使用默认端口 8081
+    // 否则使用当前 host，API 路径在同域名下
+    if (host.startsWith('localhost:')) {
+      return 'http://localhost:8081';
+    }
+    // 支持通过编译时环境变量覆盖
+    // flutter build web --dart-define=API_BASE_URL=https://your-api-server.com
+    const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+    if (apiBaseUrl.isNotEmpty) {
+      return apiBaseUrl;
+    }
+    // 默认同域名
+    return '${protocol}//$host';
+  }
+  // 移动端开发默认本地
+  return 'http://localhost:8081';
+}
 
 void main() {
   runApp(const MyApp());
@@ -42,9 +67,23 @@ class _HomePageState extends State<HomePage> {
   AppMode _currentMode = AppMode.search;
   final TextEditingController _questionController = TextEditingController();
 
-  // API 配置 - 开发环境默认本地
-  final ApiClient _apiClient = ApiClient(baseUrl: 'http://localhost:8081');
+  // API 配置 - 自动推断 base URL
+  late final ApiClient _apiClient;
   late final SearchService _searchService;
+
+  bool _isLoading = false;
+  String? _currentAnswer;
+  List<String> _currentKeywords = [];
+  Map<String, String> _explanations = {};
+  String? _documentMarkdown;
+  String? _documentMindmap;
+
+  @override
+  void initState() {
+    super.initState();
+    _apiClient = ApiClient(baseUrl: getApiBaseUrl());
+    _searchService = SearchService(apiClient: _apiClient);
+  }
 
   bool _isLoading = false;
   String? _currentAnswer;

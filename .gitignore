@@ -41,6 +41,8 @@ build/web/
 # Local environment variables
 .env
 .env.*
+server/.env
+server/.env.*
 
 # MacOS files
 *.DS_Store
@@ -48,3 +50,12 @@ build/web/
 # Flutter
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# HarmonyOS/OpenHarmony
+ohos/build/
+ohos/.ohos
+*.hap
+*.app
+
+# Docker
+docker.overcommit

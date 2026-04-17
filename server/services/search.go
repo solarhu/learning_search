@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"github.com/you/learning_search/models"
 )
 
@@ -16,10 +17,36 @@ type SearchService struct {
 
 // NewSearchService 创建搜索服务
 func NewSearchService() *SearchService {
-	apiKey := os.Getenv("OPENAI_API_KEY")
+	apiKey := ""
+	// 尝试从 .env 文件读取
+	if _, err := os.Stat(".env"); err == nil {
+		data, err := os.ReadFile(".env")
+		if err == nil {
+			lines := strings.Split(string(data), "\n")
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if line == "" || strings.HasPrefix(line, "#") {
+					continue
+				}
+				parts := strings.SplitN(line, "=", 2)
+				if len(parts) == 2 {
+					key := strings.TrimSpace(parts[0])
+					value := strings.TrimSpace(parts[1])
+					if key == "OPENAI_API_KEY" {
+						apiKey = value
+						break
+					}
+				}
+			}
+		}
+	}
+	// 如果 .env 中没找到，尝试读环境变量
 	if apiKey == "" {
-		// 尝试从环境变量读取，开发环境可以留空提示配置
-		fmt.Println("WARN: OPENAI_API_KEY not set in environment")
+		apiKey = os.Getenv("OPENAI_API_KEY")
+	}
+	if apiKey == "" {
+		// 开发环境可以留空提示配置
+		fmt.Println("WARN: OPENAI_API_KEY not set in .env or environment")
 	}
 	return &SearchService{
 		apiKey: apiKey,

@@ -3,14 +3,19 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"github.com/you/learning_search/handlers"
 	"github.com/you/learning_search/services"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// 加载 .env 文件
+	godotenv.Load()
+
 	// 初始化服务
 	searchService := services.NewSearchService()
 	handler := handlers.NewSearchHandler(searchService)
@@ -36,7 +41,14 @@ func main() {
 
 	handlerChain := c.Handler(r)
 
+	// 获取端口配置，默认 8081
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8081"
+	}
+	listenAddr := ":" + port
+
 	// 启动服务
-	log.Println("Server starting on :8081...")
-	log.Fatal(http.ListenAndServe(":8081", handlerChain))
+	log.Printf("Server starting on %s...\n", listenAddr)
+	log.Fatal(http.ListenAndServe(listenAddr, handlerChain))
 }

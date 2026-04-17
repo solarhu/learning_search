@@ -1,0 +1,21 @@
+{
+  "app": {
+    "bundleName": "com.example.learningsearch",
+    "vendor": "example",
+    "versionCode": 1,
+    "versionName": "1.0.0",
+    "icon": "$media:app.png"
+  },
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "description": "$string:module_desc",
+    "mainElement": "EntryAbility",
+    "deviceTypes": [
+      "phone",
+      "tablet"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false
+  }
+}
