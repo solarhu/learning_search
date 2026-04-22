@@ -30,6 +30,9 @@ fi
 echo "解压 Flutter ..."
 tar xf flutter.tar.xz
 
+# 配置 Git safe.directory 来避免所有权问题
+git config --global --add safe.directory "$TEMP_DIR/flutter"
+
 # 设置 Flutter 路径
 export PATH="$TEMP_DIR/flutter/bin:$PATH"
 export FLUTTER_ROOT="$TEMP_DIR/flutter"
