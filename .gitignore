@@ -59,3 +59,4 @@ ohos/.ohos
 
 # Docker
 docker.overcommit
+.vercel

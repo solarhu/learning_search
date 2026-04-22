@@ -85,19 +85,6 @@ class _HomePageState extends State<HomePage> {
     _searchService = SearchService(apiClient: _apiClient);
   }
 
-  bool _isLoading = false;
-  String? _currentAnswer;
-  List<String> _currentKeywords = [];
-  Map<String, String> _explanations = {};
-  String? _documentMarkdown;
-  String? _documentMindmap;
-
-  @override
-  void initState() {
-    super.initState();
-    _searchService = SearchService(apiClient: _apiClient);
-  }
-
   Future<void> _doSearch() async {
     final question = _questionController.text.trim();
     if (question.isEmpty) return;
