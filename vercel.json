@@ -1,6 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "./vercel-build.sh",
+  "installCommand": "true",
+  "buildCommand": "bash vercel-build.sh",
   "outputDirectory": "build/web",
   "framework": null,
   "headers": [
