@@ -44,6 +44,9 @@ build/web/
 server/.env
 server/.env.*
 
+# Server binary
+server/server
+
 # MacOS files
 *.DS_Store
 
