@@ -51,6 +51,7 @@ class _HomePageState extends State<HomePage> {
   late SearchService _searchService;
 
   bool _isLoading = false;
+  bool _isInitializing = true;
   bool _isMockMode = true;
   String? _currentAnswer;
   List<String> _currentKeywords = [];
@@ -74,7 +75,9 @@ class _HomePageState extends State<HomePage> {
       _configuredApiUrl = await ApiConfig.getBaseUrl();
     }
 
-    setState(() {});
+    setState(() {
+      _isInitializing = false;
+    });
   }
 
   Future<void> _doSearch() async {
@@ -386,6 +389,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildSearchMode() {
+    if (_isInitializing) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     return Center(
       child: SingleChildScrollView(
         child: Container(
@@ -454,7 +463,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       elevation: 0,
                     ),
-                    onPressed: _isLoading ? null : _doSearch,
+                    onPressed: (_isLoading || _isInitializing) ? null : _doSearch,
                     child: _isLoading
                         ? const SizedBox(
                             width: 16,
