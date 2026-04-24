@@ -1,37 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:html' as html;
 import 'api/client.dart';
+import 'api/api_config.dart';
+import 'api/config_loader.dart';
 import 'domain/search_service.dart';
 import 'models/keyword.dart';
 import 'widgets/keyword_text.dart';
 import 'widgets/document_view.dart';
 
-String getApiBaseUrl() {
-  // Web 环境：如果是部署在服务器上，自动使用当前域名和端口
-  if (kIsWeb) {
-    final protocol = html.window.location.protocol;
-    final host = html.window.location.host;
-    // 如果是本地开发（localhost），使用默认端口 8081
-    // 否则使用当前 host，API 路径在同域名下
-    if (host.startsWith('localhost:')) {
-      return 'http://localhost:8081';
-    }
-    // 支持通过编译时环境变量覆盖
-    // flutter build web --dart-define=API_BASE_URL=https://your-api-server.com
-    const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
-    if (apiBaseUrl.isNotEmpty) {
-      return apiBaseUrl;
-    }
-    // 默认同域名
-    return '${protocol}//$host';
-  }
-  // 移动端开发默认本地
-  return 'http://localhost:8081';
-}
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ApiConfig.getBaseUrl();
   runApp(const MyApp());
 }
 
@@ -59,30 +39,42 @@ class HomePage extends StatefulWidget {
 }
 
 enum AppMode {
-  search, // 搜索模式
-  learning, // 学习模式
+  search,
+  learning,
 }
 
 class _HomePageState extends State<HomePage> {
   AppMode _currentMode = AppMode.search;
   final TextEditingController _questionController = TextEditingController();
 
-  // API 配置 - 自动推断 base URL
-  late final ApiClient _apiClient;
-  late final SearchService _searchService;
+  late ApiClient _apiClient;
+  late SearchService _searchService;
 
   bool _isLoading = false;
+  bool _isMockMode = true;
   String? _currentAnswer;
   List<String> _currentKeywords = [];
   Map<String, String> _explanations = {};
   String? _documentMarkdown;
   String? _documentMindmap;
+  String? _configuredApiUrl;
 
   @override
   void initState() {
     super.initState();
-    _apiClient = ApiClient(baseUrl: getApiBaseUrl());
+    _initializeApiClient();
+  }
+
+  Future<void> _initializeApiClient() async {
+    _apiClient = await ApiClient.create();
     _searchService = SearchService(apiClient: _apiClient);
+    _isMockMode = _apiClient.isMockMode();
+
+    if (!_isMockMode) {
+      _configuredApiUrl = await ApiConfig.getBaseUrl();
+    }
+
+    setState(() {});
   }
 
   Future<void> _doSearch() async {
@@ -114,7 +106,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _onKeywordTap(String keyword) async {
     if (_explanations.containsKey(keyword)) {
-      // 已经解释过了，显示弹窗
       _showExplanationDialog(keyword, _explanations[keyword]!);
       return;
     }
@@ -124,8 +115,8 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
-      final explanation = await _searchService
-          .explainKeyword(Keyword(text: keyword));
+      final explanation =
+          await _searchService.explainKeyword(Keyword(text: keyword));
       setState(() {
         _explanations[keyword] = explanation;
         _isLoading = false;
@@ -161,9 +152,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 处理用户自定义关键词
   Future<void> _onCustomSelection(String keyword) async {
-    // 弹出输入框让用户添加标注说明
     final TextEditingController noteController = TextEditingController();
     showDialog(
       context: context,
@@ -173,7 +162,7 @@ class _HomePageState extends State<HomePage> {
           controller: noteController,
           decoration: const InputDecoration(
             labelText: '标注说明（可选）',
-            hintText: '比如："我想了解它在工程实践中的应用"，留空则默认解释',
+            hintText: '比如："我想了解它在工程实践中的应用"',
           ),
           maxLines: 2,
         ),
@@ -205,12 +194,10 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
-      final explanation = await _searchService
-          .explainCustomKeyword(keyword, userNote);
+      final explanation =
+          await _searchService.explainCustomKeyword(keyword, userNote);
       setState(() {
         _explanations[keyword] = explanation;
-        // 已经在searchService里加入explainedKeywords了
-        // 更新currentKeywords
         _currentKeywords = _searchService.explainedKeywords
             .where((k) => k.explanation == null)
             .map((k) => k.text)
@@ -257,6 +244,73 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _showSettingsDialog() {
+    final TextEditingController urlController = TextEditingController(
+      text: _configuredApiUrl ?? '',
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('API 配置'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '当前模式: ${_isMockMode ? "Mock 模拟" : "真实 API"}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: urlController,
+              decoration: const InputDecoration(
+                labelText: '后端 API 地址',
+                hintText: 'http://your-server:8081',
+              ),
+            ),
+            if (!kIsWeb)
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Text(
+                  '配置将保存到 api_config.json 文件',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final newUrl = urlController.text.trim();
+              Navigator.pop(context);
+
+              if (!kIsWeb && newUrl.isNotEmpty) {
+                await ConfigLoader.saveApiUrl(newUrl);
+              }
+
+              ApiConfig.setUiConfiguredUrl(newUrl);
+              await _initializeApiClient();
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text(
+                          newUrl.isEmpty ? '已切换到 Mock 模式' : 'API 地址已更新')),
+                );
+              }
+            },
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _switchMode(AppMode mode) {
     setState(() {
       _currentMode = mode;
@@ -279,9 +333,28 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('递进式学习搜索'),
+        title: Row(
+          children: [
+            const Text('递进式学习搜索'),
+            if (_isMockMode)
+              Container(
+                margin: const EdgeInsets.only(left: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text('Mock', style: TextStyle(fontSize: 12)),
+              ),
+          ],
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'API 配置',
+            onPressed: _showSettingsDialog,
+          ),
           if (_currentMode == AppMode.learning)
             IconButton(
               icon: const Icon(Icons.refresh),
@@ -322,7 +395,6 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo/Title - Google style
               const Text(
                 '递进式学习搜索',
                 style: TextStyle(
@@ -331,8 +403,13 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.black87,
                 ),
               ),
+              const SizedBox(height: 8),
+              if (_isMockMode)
+                const Text(
+                  '演示模式 · 输入 "openclaw是什么" 查看完整示例',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
               const SizedBox(height: 40),
-              // Search box
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -361,7 +438,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 32),
-              // Search button
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -380,7 +456,11 @@ class _HomePageState extends State<HomePage> {
                     ),
                     onPressed: _isLoading ? null : _doSearch,
                     child: _isLoading
-                        ? const CircularProgressIndicator()
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : const Text('搜索', style: TextStyle(fontSize: 14)),
                   ),
                   const SizedBox(width: 12),
@@ -398,13 +478,13 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       onPressed: _resetSearch,
-                      child: const Text('清空', style: TextStyle(fontSize: 14)),
+                      child:
+                          const Text('清空', style: TextStyle(fontSize: 14)),
                     ),
                 ],
               ),
               const SizedBox(height: 40),
-              // Search results
-              if (_currentAnswer != null) ...[
+              if (_currentAnswer != null)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -430,23 +510,24 @@ class _HomePageState extends State<HomePage> {
                         onKeywordTap: _onKeywordTap,
                         onCustomSelection: _onCustomSelection,
                       ),
-                      if (_explanations.isNotEmpty) ...[
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                      if (_explanations.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                              onPressed: _isLoading ? null : _generateDocument,
+                              child: const Text('生成完整学习文档'),
                             ),
-                            onPressed: _isLoading ? null : _generateDocument,
-                            child: const Text('生成完整学习文档'),
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ),
-              ],
             ],
           ),
         ),
