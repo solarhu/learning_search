@@ -13,11 +13,14 @@ class ApiClient {
   static Future<ApiClient> create() async {
     final baseUrl = await ApiConfig.getBaseUrl();
     final useMock = baseUrl.isEmpty;
+    print('=== ApiClient.create: baseUrl="$baseUrl", useMock=$useMock ===');
     return ApiClient(baseUrl: baseUrl, useMock: useMock);
   }
 
   Future<SearchResponse> search(String question) async {
+    print('=== search called: useMock=$useMock, question="$question" ===');
     if (useMock) {
+      print('=== Using Mock Data ===');
       final mockResponse = MockDataService.getSearchResponse(question);
       return SearchResponse(
         answer: mockResponse.answer,
@@ -25,6 +28,7 @@ class ApiClient {
       );
     }
 
+    print('=== Calling API: $baseUrl/api/search ===');
     final response = await http.post(
       Uri.parse('$baseUrl/api/search'),
       body: jsonEncode({'question': question}),

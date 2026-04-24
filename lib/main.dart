@@ -71,6 +71,9 @@ class _HomePageState extends State<HomePage> {
     _searchService = SearchService(apiClient: _apiClient);
     _isMockMode = _apiClient.isMockMode();
 
+    print('=== DEBUG: Mock Mode = $_isMockMode ===');
+    print('=== DEBUG: Base URL = ${await ApiConfig.getBaseUrl()} ===');
+
     if (!_isMockMode) {
       _configuredApiUrl = await ApiConfig.getBaseUrl();
     }
