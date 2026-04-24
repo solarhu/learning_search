@@ -85,35 +85,7 @@ class KeywordText extends StatelessWidget {
   }
 
   void _handleLongPress(BuildContext context) {
-    // 长按弹出简单对话框让用户输入要标注的文本
-    // 用户可以确认或修改选中的文本
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('添加自定义标注'),
-        content: const Text('长按选中了整片文本。请输入你想要自定义标注的词语:'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {
-              // 这里简化：让用户手动输入要标注的文本
-              // 完美文本选择需要更复杂的处理，MVP先用简化方案
-              Navigator.pop(context);
-              _showInputDialog(context);
-            },
-            child: const Text('继续'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showInputDialog(BuildContext context) {
     final TextEditingController textController = TextEditingController();
-    final TextEditingController noteController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -121,21 +93,15 @@ class KeywordText extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Text('输入你想深入了解的词语：'),
+            const SizedBox(height: 12),
             TextField(
               controller: textController,
               decoration: const InputDecoration(
-                labelText: '要解释的词语',
-                hintText: '输入你想深入了解的词语',
+                hintText: '例如：代码补全',
+                border: OutlineInputBorder(),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: noteController,
-              decoration: const InputDecoration(
-                labelText: '标注说明（可选）',
-                hintText: '比如："我想了解它在React中的应用"',
-              ),
-              maxLines: 2,
+              autofocus: true,
             ),
           ],
         ),
@@ -144,7 +110,7 @@ class KeywordText extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: const Text('取消'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               final selectedText = textController.text.trim();
               if (selectedText.isNotEmpty) {
@@ -152,7 +118,7 @@ class KeywordText extends StatelessWidget {
                 onCustomSelection(selectedText);
               }
             },
-            child: const Text('添加解释'),
+            child: const Text('获取解释'),
           ),
         ],
       ),

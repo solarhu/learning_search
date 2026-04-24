@@ -158,26 +158,80 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _onCustomSelection(String keyword) async {
-    final TextEditingController noteController = TextEditingController();
+  void _showAddCustomKeywordDialog() {
+    final TextEditingController keywordController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('自定义标注说明'),
-        content: TextField(
-          controller: noteController,
-          decoration: const InputDecoration(
-            labelText: '标注说明（可选）',
-            hintText: '比如："我想了解它在工程实践中的应用"',
-          ),
-          maxLines: 2,
+        title: const Text('添加自定义关键词'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('输入你想深入了解的词语：'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: keywordController,
+              decoration: const InputDecoration(
+                hintText: '例如：代码补全',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('取消'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              final keyword = keywordController.text.trim();
+              if (keyword.isNotEmpty) {
+                Navigator.pop(context);
+                _onCustomSelection(keyword);
+              }
+            },
+            child: const Text('继续'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _onCustomSelection(String keyword) async {
+    final TextEditingController noteController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('解释「$keyword」'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('添加个性化标注（可选）：'),
+            const SizedBox(height: 8),
+            TextField(
+              controller: noteController,
+              decoration: const InputDecoration(
+                hintText: '例如：我想了解它在实际项目中的应用',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '留空则获取通用解释',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
           TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               _doExplainCustom(keyword, noteController.text.trim());
@@ -521,6 +575,25 @@ class _HomePageState extends State<HomePage> {
                         keywords: _currentKeywords,
                         onKeywordTap: _onKeywordTap,
                         onCustomSelection: _onCustomSelection,
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Text(
+                            '💡 点击蓝色关键词查看解释',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          const Spacer(),
+                          TextButton.icon(
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text('自定义关键词'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.blue[700],
+                              fontSize: 12,
+                            ),
+                            onPressed: () => _showAddCustomKeywordDialog(),
+                          ),
+                        ],
                       ),
                       if (_explanations.isNotEmpty)
                         Padding(
