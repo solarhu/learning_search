@@ -1,6 +1,6 @@
 # 递进式学习搜索工具 - 设计方案
 
-> 最后更新：2026-04-07
+> 最后更新：2026-04-24
 
 ## 需求回顾
 ### 核心功能
@@ -11,40 +11,62 @@
 - 学习模式：直接展示完整结构化学习材料
 1. **材料下载**：支持导出 Markdown / PDF 下载
 1. **用户自定义标注**：除自动提取关键词外，两种模式都支持用户自行选取文本标注 → 自动解释 → 实时补充到学习材料
+
 ### 输出要求
 - 开篇：思维导图展示知识框架
 - 正文：按依赖递进关系展开
 - 包含必要例子和图示
 - 知识点言简意赅
+
 ### 部署目标
-- 网页版 + 鸿蒙OS手机App
+- 网页版 + 鸕蒙OS手机App
 - 代码尽可能共享
+- Vercel 演示 + 云服务器生产部署
 
 ---
 
 ## 整体架构设计
+
+### 部署架构
+```plaintext
+┌─────────────────────────────────────────────────────────────────┐
+│                        部署架构                                  │
+│                                                                 │
+│  ┌─────────────────┐          ┌─────────────────┐              │
+│  │    Vercel       │          │   云服务器       │              │
+│  │  (演示/开发)    │          │   (生产环境)    │              │
+│  │                 │          │                 │              │
+│  │  Flutter Web    │          │  Go API Server  │              │
+│  │  + Mock 数据    │◄────────►│  + OpenAI API   │              │
+│  │                 │   API    │                 │              │
+│  └─────────────────┘  调用    └─────────────────┘              │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 应用架构
 ```plaintext
 ┌─────────────────────────────────────────────────────────┐
 │                   用户交互层                              │
 │  ┌───────────┐  ┌───────────┐                            │
-│  │   网页end   │  │ 鸿蒙App   │  共用业务逻辑/状态管理       │
+│  │   Web端    │  │ 鸕蒙App   │  共用业务逻辑/状态管理       │
 │  └─────┬─────┘  └─────┬─────┘                            │
 │        │              │                                  │
 └────────┼──────────────┼──────────────────────────────────┘
          │              │
          ▼              ▼
 ┌─────────────────────────────────────────────────────────┐
-│                共享业务逻辑层 (Flutter/Web)                │
+│                共享业务逻辑层 (Flutter)                    │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────────┐  │
-│  │ 搜索处理器    │ │ 关键词交互器 │ │ 文档生成器        │  │
+│  │ API 配置管理  │ │ Mock 服务    │ │ 搜索/文档服务     │  │
 │  └──────────────┘ └──────────────┘ └──────────────────┘  │
-└──────────────────────────────────┬──────────────────────┘
-                                   │
-         ┌─────────────────────────┘
+└──────────────────────────┬──────────────────────────────┘
+                           │
+         ┌─────────────────┘
          │
          ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   后端服务 API                            │
+│                   后端服务 API (Go)                        │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────────┐  │
 │  │ 搜索问答服务  │ │ LLM 推理服务  │ │ 文档导出服务      │  │
 │  └──────────────┘ └──────────────┘ └──────────────────┘  │
@@ -53,60 +75,95 @@
 
 ---
 
+## 运行模式设计
+
+### Mock 模式（演示）
+无后端 API 时自动启用，使用内置模拟数据：
+- 适合 Vercel 演示、UI 测试、功能展示
+- 输入 `openclaw是什么` 可查看完整示例
+- 包含 5 个预设关键词及详细解释
+
+### AI 模式（生产）
+配置后端 API 后启用，调用真实 AI 服务：
+- 后端部署在云服务器（Docker）
+- 支持 OpenAI 及兼容接口
+- 可自定义模型和 API 地址
+
+### API 地址配置（按优先级检查）
+| 优先级 | 方式 | 适用场景 | 说明 |
+|--------|------|----------|------|
+| 1 | 编译时环境变量 | 生产部署 | `flutter build --dart-define=API_BASE_URL=xxx` |
+| 2 | 配置文件 | 鸕蒙/移动端 | `api_config.json` 文件 |
+| 3 | UI 设置界面 | 开发调试 | 点击右上角设置图标输入 |
+
+---
+
 ## 技术选型方案
+
 ### 跨端方案：Flutter
 **实际实现**：
-- ✅ 一套代码同时编译 Web + 鸿蒙
-- ✅ 鸿蒙官方已经支持 Flutter
+- ✅ 一套代码同时编译 Web + 鸕蒙
+- ✅ 鸕蒙官方已经支持 Flutter
 - ✅ UI 组件丰富，交互流畅
 - ✅ 社区活跃，生态完善
+
 ### 后端技术选型
 
 | 层级 | 推荐方案 | 备选方案 | 说明 |
 |------|---------|---------|-----|
-| 语言 | Go (gorilla/mux) | Python (FastAPI) | Go 性能好，部署简单；Python 开发快 |
+| 语言 | Go (gorilla/mux) | Python (FastAPI) | Go 性能好，部署简单 |
 | API | RESTful + HTTP | gRPC | REST 足够用，跨端调用简单 |
 | LLM 调用 | OpenAI 兼容接口 | 直接调用火山引擎/文心一言 | 便于切换模型 |
-| 缓存 | 内存缓存（第一阶段） | Redis | 加速重复搜索，第一阶段暂不引入外部依赖 |
-| 存储 | 无存储（第一阶段） | SQLite / PostgreSQL | MVP 阶段不持久化，纯会话式 |
+| 缓存 | 内存缓存（第一阶段） | Redis | 加速重复搜索 |
+| 存储 | 无存储（第一阶段） | SQLite / PostgreSQL | MVP 阶段不持久化 |
+| 部署 | Docker + Docker Compose | K8s | 云服务器部署，简单可靠 |
 
 ### 关键模块职责
+
 #### 1. 前端/客户端模块
 
 | 模块名 | 职责 | 实际实现状态 |
 |---------|------|---------------|
-| HomePage (SearchPage) | 用户输入问题，展示带标注的核心答案 | ✅ 已实现 |
-| KeywordText (KeywordInteraction) | 处理用户点击/选择关键词，返回解释 | ✅ 已实现（增加自定义选择） |
-| **ModeSwitcher** | **搜索模式 / 学习模式切换** | ✅ 已实现（底部NavigationBar） |
-| **CustomKeywordHandler** | **处理用户自选文本标注 → 请求解释 → 实时更新文档** | ✅ **已完成** |
+| HomePage | 用户输入问题，展示带标注的核心答案 | ✅ 已实现 |
+| ApiConfig | API 地址配置管理（环境变量/配置文件/UI） | ✅ 已实现 |
+| MockService | Mock 数据服务，openclaw 示例数据 | ✅ 已实现 |
+| KeywordText | 处理用户点击/选择关键词，返回解释 | ✅ 已实现 |
+| ModeSwitcher | 搜索模式 / 学习模式切换 | ✅ 已实现（底部NavigationBar） |
+| CustomKeywordHandler | 处理用户自选文本标注 → 请求解释 → 实时更新文档 | ✅ 已实现 |
 | DocumentGenerator | 按模板生成结构化学习文档 | ✅ 已实现 |
-| MindmapView (MindmapRenderer) | 渲染文本思维导图 | ✅ 已实现（纯文本缩进） |
-| DocumentView | 展示完整学习文档 | ✅ 已实现（增加长按自定义标注） |
-| DocumentExporter | **Markdown / PDF 导出下载** | ✅ **已完成** |
+| MindmapView | 渲染文本思维导图 | ✅ 已实现（纯文本缩进） |
+| DocumentView | 展示完整学习文档 | ✅ 已实现 |
+| DocumentExporter | Markdown / PDF 导出下载 | ✅ 已实现 |
 
 #### 2. 后端模块
 
 | 模块名 | 职责 | 实际实现状态 |
 |---------|------|---------------|
 | SearchHandler | 处理用户搜索请求，调用 LLM 生成答案和关键词 | ✅ 已实现 |
-| KeywordExtractor | 从答案中提取关键知识点，打标 | ⚠️ **由 LLM 直接返回关键词列表，后端不单独处理**（设计简化） |
 | KeywordExplainer | 对单个知识点生成言简意赅的解释 | ✅ 已实现 |
-| DocumentComposer | 按递进关系整理所有知识点，输出完整文档 | ✅ 已实现（LLM 完成组合） |
-| MindmapGenerator | 生成文本思维导图 | ✅ 已实现（Markdown 列表格式，简化设计） |
-| ExportHandler | 处理文档导出请求 | ✅ **已完成** |
+| DocumentComposer | 按递进关系整理所有知识点，输出完整文档 | ✅ 已实现 |
+| MindmapGenerator | 生成文本思维导图 | ✅ 已实现 |
+| ExportHandler | 处理文档导出请求（PDF/Markdown） | ✅ 已实现 |
+| Docker 部署 | Dockerfile + docker-compose.yml | ✅ 已实现 |
 
 ---
 
 ## 工作流程图
+
 ```plaintext
 用户打开App/Web
+    │
+    ├─► 检测 API 地址配置（环境变量 → 配置文件 → UI设置）
+    │       │
+    │       ├─► 有配置 → AI 模式（调用后端 API）
+    │       └─► 无配置 → Mock 模式（本地模拟数据）
     │
     ├─► 底部导航选择模式：搜索模式 / 学习模式
     │
     ├─▷ 搜索模式：
-    │      [输入问题] → SearchHandler
+    │      [输入问题] → SearchHandler / MockService
     │              ↓
-    │      LLM直接生成核心答案 + 关键词列表（不再标注格式，前端高亮）
+    │      核心答案 + 关键词列表
     │              ↓
     │      展示答案，关键词可点击：
     │         ├─ 点击自动关键词 → 获取解释弹窗
@@ -118,54 +175,69 @@
     │
     └─▷ 学习模式：
             展示完整结构化文档（思维导图 + Markdown 双栏）
-               └─ 长按添加自定义关键词 → 获取解释 → 解释存入会话
+               └─ 长按添加自定义关键词 → 获取解释
                         ↓
                    导出 Markdown / PDF 下载
-
 ```
 
 ---
 
-## 项目目录结构（实际）
+## 项目目录结构
+
 ```plaintext
 learning_search/
-├── lib/                      # 共享代码 (Flutter)
+├── lib/                      # Flutter 共享代码
+│   ├── api/                  # API 相关
+│   │   ├── client.dart       # API 客户端（支持 Mock/AI 双模式）
+│   │   ├── api_config.dart   # API 地址配置管理
+│   │   ├── config_loader.dart # 配置文件读取
+│   │   └── mock_service.dart # Mock 数据服务
 │   ├── domain/               # 业务逻辑
 │   │   └── search_service.dart
 │   ├── models/               # 数据模型
 │   │   ├── question.dart
 │   │   ├── keyword.dart
 │   │   └── learning_document.dart
-│   ├── api/                  # API 客户端
-│   │   └── client.dart
-│   └── widgets/              # 共享 UI 组件
-│       ├── keyword_text.dart    # 带可点击关键词+长按自定义标注
-│       ├── mindmap_view.dart    # 思维导图展示
-│       └── document_view.dart   # 完整文档展示+长按自定义标注
+│   ├── widgets/              # UI 组件
+│   │   ├── keyword_text.dart    # 带可点击关键词+长按自定义标注
+│   │   ├── mindmap_view.dart    # 思维导图展示
+│   │   └── document_view.dart   # 完整文档展示
+│   ├── utils/                # 工具类
+│   │   ├── download_utils_io.dart   # 非 Web 下载占位
+│   │   ├── download_utils_web.dart  # Web 下载触发
+│   │   └── download.dart            # 下载入口
 │   └── main.dart             # 入口，主界面
 │
-├── lib/utils/                # 工具类
-│       ├── download_utils_io.dart   # 非Web下载占位
-│       └── download_utils_web.dart  # Web下载触发
-│
-├── web/                      # Web 特定配置
+├── web/                      # Web 配置
 │   └── index.html
 │
-└── server/                   # 后端服务 (Go)
-    ├── main.go
-    ├── handlers/             # HTTP 处理器
-    │   └── search.go
-    ├── services/             # 业务逻辑
-    │   └── search.go
-    └── models/               # 数据模型
-        └── models.go
-
-*注：鸿蒙 ohos 目录待后续适配阶段创建
+├── ohos/                     # 鸕蒙项目配置
+│
+├── server/                   # Go 后端服务
+│   ├── main.go               # 入口
+│   ├── Dockerfile            # Docker 构建配置
+│   ├── docker-compose.yml    # Docker Compose 配置
+│   ├── .env.example          # 环境变量示例
+│   ├── handlers/             # HTTP 处理器
+│   │   └── search.go
+│   ├── services/             # 业务逻辑
+│   │   └── search.go
+│   └── models/               # 数据模型
+│       └── models.go
+│
+├── docs/                     # 文档
+│   ├── design.md             # 设计文档
+│   └── DEVELOPMENT.md        # 开发记录
+│
+├── vercel.json               # Vercel 部署配置
+├── vercel-build.sh           # Vercel 构建脚本
+└── README.md                 # 项目说明
 ```
 
 ---
 
 ## LLM 提示词设计
+
 ### 1. 生成核心答案 + 返回关键词列表
 ```plaintext
 你是一个专业的学习助手。用户问题：%s
@@ -180,8 +252,6 @@ learning_search/
   "keywords": ["关键词1", "关键词2"]
 }
 ```
-
-**变更说明**：原设计要求 LLM 在答案文本中用 `{{关键词}}` 标注，实际实现改为 LLM 直接返回关键词列表，前端处理高亮，简化了前后端处理逻辑。
 
 ### 2. 解释单个关键词
 ```plaintext
@@ -206,11 +276,10 @@ learning_search/
 }
 ```
 
-**变更说明**：原设计要求输出 Mermaid 代码，实际简化为 Markdown 列表格式思维导图，兼容性更好，无需额外渲染库。
-
 ---
 
-## 前后端 API 设计（已实现）
+## 前后端 API 设计
+
 ### `POST /api/search`
 请求：
 ```json
@@ -238,11 +307,9 @@ learning_search/
 响应：
 ```json
 {
-  "explanation": "知识点解释，可带例子"
+  "explanation": "知识点解释，Markdown格式"
 }
 ```
-
-**变更说明**：原设计包含 `context` 字段，实际简化，后端不需要（LLM 提示词已包含关键词本身）。
 
 ### `POST /api/explain-custom`
 请求：
@@ -259,8 +326,6 @@ learning_search/
   "explanation": "知识点解释"
 }
 ```
-
-**变更说明**：原设计包含 `document_id` 和返回 `updated_document`，实际简化。MVP 阶段不做后端文档持久化，由前端维护状态。
 
 ### `POST /api/generate-document`
 请求：
@@ -282,8 +347,6 @@ learning_search/
 }
 ```
 
-**变更说明**：原设计传递 `history` 数组，实际简化为 `explanations` map，后端处理更简单。
-
 ### `POST /api/export`
 请求：
 ```json
@@ -295,42 +358,73 @@ learning_search/
 
 响应：直接返回文件二进制
 
-**变更说明**：端点路径从 `/api/export-document` 简化为 `/api/export`，请求参数直接传入文档内容，不需要 `document_id`（MVP 无持久化）。
+---
+
+## 部署方案
+
+### Vercel 演示部署
+| 配置项 | 值 |
+|--------|---|
+| Framework | Other |
+| Build Command | `bash vercel-build.sh` |
+| Output Directory | `build/web` |
+| 环境变量 | 无（Mock 模式） |
+
+**部署后效果：**
+- 自动 Mock 模式
+- 输入 `openclaw是什么` 查看完整示例
+- 点击右上角设置可配置后端地址
+
+### 云服务器生产部署
+
+#### 环境变量
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| OPENAI_API_KEY | OpenAI API 密钥 | 必填 |
+| OPENAI_API_BASE | API 地址 | https://api.openai.com/v1 |
+| OPENAI_MODEL | 模型名称 | gpt-4o |
+| PORT | 服务端口 | 8081 |
+
+#### Docker 部署步骤
+```bash
+cd server
+cp .env.example .env
+# 编辑 .env 设置 OPENAI_API_KEY
+docker-compose up -d
+```
+
+#### 前端配置后端地址
+```bash
+flutter build web --dart-define=API_BASE_URL=https://your-server.com
+```
 
 ---
 
 ## 开发进度
-### 已完成 (Phase 1 MVP)
-1. ✅ 项目脚手架搭建（Flutter + Go）
-1. ✅ Flutter 前端完整核心流程：
-  - 搜索界面
-  - 双模式切换
-  - 关键词点击交互 + 长按自定义标注
-  - 文档生成和展示
-1. ✅ Go 后端全部 API 端点实现：
-  - 集成 OpenAI API 调用
-  - 开发模式：无 API Key 也可返回模拟数据调试
-  - CORS 支持
-1. ✅ Flutter Web 首次构建成功
-1. ✅ **文档导出功能（PDF/Markdown）**
-1. ✅ **用户自定义关键词选择 UI**
+
+### 已完成
+| 功能 | 状态 |
+|------|------|
+| 项目脚手架搭建（Flutter + Go） | ✅ |
+| Flutter 前端完整核心流程 | ✅ |
+| 双模式切换（搜索/学习） | ✅ |
+| 关键词点击交互 + 长按自定义标注 | ✅ |
+| 文档生成和展示 | ✅ |
+| Go 后端全部 API 端点 | ✅ |
+| OpenAI API 集成 | ✅ |
+| 文档导出功能（PDF/Markdown） | ✅ |
+| **Mock 模式演示数据** | ✅ |
+| **API 地址配置管理** | ✅ |
+| **Docker 部署配置** | ✅ |
+| **Vercel 演示部署** | ✅ |
 
 ### 待开发
-1. ⚠️ 鸿蒙适配
-2. ⚠️ 文档持久化存储
-3. ⚠️ 配置生产环境 OpenAI API Key
-
----
-
-## 优缺点分析
-
-| 方案 | 优点 | 缺点 |
-|------|------|------|
-| Flutter 全跨端 | 代码共享率最高，开发快 | Flutter for 鸿蒙稳定性需要验证 |
-| Flutter + ArkTS | 鸿蒙体验更好 | 代码共享率降低，开发工作量大 |
-| Go 后端 | 性能好，单二进制部署简单 | 无明显缺点 |
-
-**当前选择**：**Flutter 全跨端** 方案，代码共享率>90%，开发最快。如果鸿蒙遇到兼容性问题再拆分 UI 层。
+| 功能 | 状态 |
+|------|------|
+| 鸕蒙适配编译测试 | ⚠️ |
+| 文档持久化存储 | ⚠️ |
+| 用户账户系统 | ⚠️ |
+| 搜索历史记录 | ⚠️ |
 
 ---
 
@@ -338,12 +432,35 @@ learning_search/
 
 | 变更项 | 原设计 | 实际实现 | 原因 |
 |---------|------|------------|-----|
-| **关键词提取** | LLM 在文本中用 `{{}}` 标注，后端提取 | LLM 直接返回关键词列表 | 简化解析，前端更容易处理高亮 |
-| **思维导图格式** | Mermaid 代码 | Markdown 缩进列表 | 无需 JS 渲染库，兼容性更好 |
-| **API explain** | 传递 `context` 上下文 | 只传 `keyword` | 简化，LLM 只需要关键词本身足够 |
-| **API explain-custom** | 需要 `document_id`，返回更新后的文档 | 只返回解释，状态由前端维护 | MVP 阶段不做后端持久化，简化设计 |
-| **关键词提取模块** | 后端独立 KeywordExtractor | LLM 直接输出，无单独模块 | 利用 LLM 能力，减少代码复杂度 |
-| **缓存/存储** | Redis + SQL 持久化 | 无外部依赖，内存会话 | MVP 先验证核心流程，不提前引入复杂度 |
-| **项目结构** | 拆分 keyword_extractor / document_composer | 合并到 search_service | 当前逻辑简单，不需要过度拆分 |
-| **端点命名** | `/export-document` | `/export` | 简化命名 |
+| 关键词提取 | LLM 在文本中用 `{{}}` 标注 | LLM 直接返回关键词列表 | 简化解析，前端更容易处理 |
+| 思维导图格式 | Mermaid 代码 | Markdown 缩进列表 | 无需 JS 渲染库，兼容性更好 |
+| API explain | 传递 `context` | 只传 `keyword` | 简化，LLM 只需要关键词 |
+| API explain-custom | 需要 `document_id` | 只返回解释 | MVP 不做后端持久化 |
+| 缓存/存储 | Redis + SQL | 无外部依赖 | MVP 先验证核心流程 |
+| **运行模式** | 仅真实 API | Mock + AI 双模式 | 支持无后端演示 |
+| **API 配置** | 固定地址 | 三种方式按优先级 | 灵活适应不同场景 |
+| **部署架构** | 单一部署 | Vercel 演示 + 云生产 | 分离演示和生产环境 |
+| **后端部署** | 直接运行 | Docker + Docker Compose | 标准化云部署 |
 
+---
+
+## Mock 数据设计
+
+### 示例问题：openclaw是什么
+
+**核心答案：**
+OpenClaw 是一个开源的 AI 辅助编程工具，专注于提供智能化的代码开发体验。
+
+**关键词列表：**
+1. AI辅助编程
+2. 代码补全
+3. 智能开发
+4. 开源项目
+5. 开发效率
+
+**每个关键词解释包含：**
+- 定义说明
+- 核心原理
+- 主要功能/应用场景
+- 实际示例
+- 学习建议

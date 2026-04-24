@@ -1,14 +1,34 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/keyword.dart';
+import 'mock_service.dart';
+import 'api_config.dart';
 
 class ApiClient {
   final String baseUrl;
+  final bool useMock;
 
-  ApiClient({required this.baseUrl});
+  ApiClient({required this.baseUrl, this.useMock = false});
 
-  /// 搜索问题，获取带标注的答案
+  static Future<ApiClient> create() async {
+    final baseUrl = await ApiConfig.getBaseUrl();
+    final useMock = baseUrl.isEmpty;
+    print('=== ApiClient.create: baseUrl="$baseUrl", useMock=$useMock ===');
+    return ApiClient(baseUrl: baseUrl, useMock: useMock);
+  }
+
   Future<SearchResponse> search(String question) async {
+    print('=== search called: useMock=$useMock, question="$question" ===');
+    if (useMock) {
+      print('=== Using Mock Data ===');
+      final mockResponse = MockDataService.getSearchResponse(question);
+      return SearchResponse(
+        answer: mockResponse.answer,
+        keywords: mockResponse.keywords,
+      );
+    }
+
+    print('=== Calling API: $baseUrl/api/search ===');
     final response = await http.post(
       Uri.parse('$baseUrl/api/search'),
       body: jsonEncode({'question': question}),
@@ -26,13 +46,14 @@ class ApiClient {
     }
   }
 
-  /// 解释自动标注的关键词
   Future<String> explain(String keyword) async {
+    if (useMock) {
+      return MockDataService.getExplanation(keyword);
+    }
+
     final response = await http.post(
       Uri.parse('$baseUrl/api/explain'),
-      body: jsonEncode({
-        'keyword': keyword,
-      }),
+      body: jsonEncode({'keyword': keyword}),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -44,11 +65,11 @@ class ApiClient {
     }
   }
 
-  /// 解释用户自定义关键词
-  Future<String> explainCustom(
-    String keyword,
-    String userNote,
-  ) async {
+  Future<String> explainCustom(String keyword, String userNote) async {
+    if (useMock) {
+      return MockDataService.getExplanation(keyword, userNote: userNote);
+    }
+
     final response = await http.post(
       Uri.parse('$baseUrl/api/explain-custom'),
       body: jsonEncode({
@@ -66,16 +87,23 @@ class ApiClient {
     }
   }
 
-  /// 生成学习文档
   Future<GenerateDocumentResponse> generateDocument(
     String question,
     List<Keyword> history,
   ) async {
-    // Convert to Map<String, String> explanations
     final explanations = {
       for (var kw in history.where((k) => k.explanation != null))
         kw.text: kw.explanation!
     };
+
+    if (useMock) {
+      final mockResponse = MockDataService.generateDocument(question, explanations);
+      return GenerateDocumentResponse(
+        markdown: mockResponse.markdown,
+        mindmap: mockResponse.mindmap,
+      );
+    }
+
     final response = await http.post(
       Uri.parse('$baseUrl/api/generate-document'),
       body: jsonEncode({
@@ -96,11 +124,14 @@ class ApiClient {
     }
   }
 
-  /// 导出文档
-  Future<List<int>> exportDocument(
-    String markdown,
-    String format,
-  ) async {
+  Future<List<int>> exportDocument(String markdown, String format) async {
+    if (useMock) {
+      if (format == 'md') {
+        return utf8.encode(markdown);
+      }
+      throw Exception('PDF export requires real backend API');
+    }
+
     final response = await http.post(
       Uri.parse('$baseUrl/api/export'),
       body: jsonEncode({
@@ -116,6 +147,8 @@ class ApiClient {
       throw Exception('Export failed: ${response.statusCode}');
     }
   }
+
+  bool isMockMode() => useMock;
 }
 
 class SearchResponse {
@@ -125,32 +158,9 @@ class SearchResponse {
   SearchResponse({required this.answer, required this.keywords});
 }
 
-class ExplainCustomResponse {
-  final String explanation;
-  final String? updatedDocument;
-
-  ExplainCustomResponse({
-    required this.explanation,
-    this.updatedDocument,
-  });
-}
-
 class GenerateDocumentResponse {
   final String markdown;
   final String mindmap;
 
-  GenerateDocumentResponse({
-    required this.markdown,
-    required this.mindmap,
-  });
-}
-
-class ExportResponse {
-  final String? downloadUrl;
-  final String? content;
-
-  ExportResponse({
-    this.downloadUrl,
-    this.content,
-  });
+  GenerateDocumentResponse({required this.markdown, required this.mindmap});
 }
