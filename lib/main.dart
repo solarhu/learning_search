@@ -8,6 +8,7 @@ import 'domain/search_service.dart';
 import 'models/keyword.dart';
 import 'widgets/keyword_text.dart';
 import 'widgets/document_view.dart';
+import 'dart:html' if (dart.library.io) 'api/stub_html.dart' as html;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -197,6 +198,32 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  void _addSelectedKeyword() {
+    if (!kIsWeb) {
+      _showAddCustomKeywordDialog();
+      return;
+    }
+
+    try {
+      final selection = html.window.getSelection();
+      if (selection != null && selection.toString().trim().length > 0) {
+        final selectedText = selection.toString().trim();
+        setState(() {
+          if (!_currentKeywords.contains(selectedText)) {
+            _currentKeywords.add(selectedText);
+          }
+        });
+        _onCustomSelection(selectedText);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('请先在答案中划选词语')),
+        );
+      }
+    } catch (e) {
+      _showAddCustomKeywordDialog();
+    }
   }
 
   Future<void> _onCustomSelection(String keyword) async {
@@ -574,61 +601,26 @@ if (_currentAnswer != null)
                           const Spacer(),
                           TextButton.icon(
                             icon: const Icon(Icons.add_circle_outline, size: 18),
-                            label: const Text('添加关键词'),
+                            label: const Text('添加选中词'),
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.blue[700],
                             ),
-                            onPressed: _showAddCustomKeywordDialog,
+                            onPressed: _addSelectedKeyword,
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        '💡 选择下方文本中的词语，点击「添加关键词」按钮',
+                        '💡 点击蓝色关键词查看解释，或划选词语后点击「添加选中词」',
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
-                      const SizedBox(height: 16),
-                      SelectableText(
-                        _currentAnswer!,
-                        style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      const SizedBox(height: 12),
+                      KeywordText(
+                        text: _currentAnswer!,
+                        keywords: _currentKeywords,
+                        onKeywordTap: _onKeywordTap,
+                        onCustomSelection: _onCustomSelection,
                       ),
-                      if (_currentKeywords.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                '关键词（点击查看解释）：',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: _currentKeywords.map((keyword) {
-                                  final hasExplanation = _explanations.containsKey(keyword);
-                                  return ActionChip(
-                                    label: Text(keyword),
-                                    backgroundColor: hasExplanation
-                                        ? Colors.green[50]
-                                        : Colors.blue[50],
-                                    side: BorderSide(
-                                      color: hasExplanation
-                                          ? Colors.green[200]!
-                                          : Colors.blue[200]!,
-                                    ),
-                                    onPressed: () => _onKeywordTap(keyword),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        ),
                       if (_explanations.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 20),
