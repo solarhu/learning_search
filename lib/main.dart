@@ -454,7 +454,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.only(top: 20),
               child: Center(
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.document_outlined),
+                  icon: const Icon(Icons.description),
                   label: const Text('生成学习文档'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue[600],
@@ -504,7 +504,7 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.tag_none, size: 32, color: Colors.grey[400]),
+                        Icon(Icons.label_outline, size: 32, color: Colors.grey[400]),
                         const SizedBox(height: 8),
                         Text('暂无关键词', style: TextStyle(color: Colors.grey[500])),
                       ],
@@ -533,7 +533,7 @@ class _HomePageState extends State<HomePage> {
                               dense: true,
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               leading: Icon(
-                                hasExplanation ? Icons.check_circle : Icons.circle_outline,
+                                hasExplanation ? Icons.check_circle : Icons.panorama_fish_eye,
                                 size: 20,
                                 color: hasExplanation ? Colors.green[600] : Colors.grey[400],
                               ),
