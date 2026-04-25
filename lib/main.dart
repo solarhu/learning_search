@@ -431,33 +431,38 @@ class _HomePageState extends State<HomePage> {
     final isWide = screenWidth > 900;
 
     if (isWide) {
-      // 两边留白，内容居中靠拢
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 48),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(flex: 60, child: _buildAnswerPanel()),
-            Expanded(flex: 40, child: _buildKeywordPanel()),
-          ],
+      // 内容区域限制最大宽度，居中显示，保持体验一致
+      return Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 1000),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 65, child: _buildAnswerPanel()),
+              Expanded(flex: 35, child: _buildKeywordPanel()),
+            ],
+          ),
         ),
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          Expanded(flex: 6, child: _buildAnswerPanel()),
-          Expanded(flex: 4, child: _buildKeywordPanel()),
-        ],
+    // 小屏幕：上下布局，内容居中
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Column(
+          children: [
+            Expanded(flex: 6, child: _buildAnswerPanel()),
+            Expanded(flex: 4, child: _buildKeywordPanel()),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildAnswerPanel() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+      padding: const EdgeInsets.fromLTRB(24, 20, 16, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -534,7 +539,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildKeywordPanel() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(8, 16, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 20, 24, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
