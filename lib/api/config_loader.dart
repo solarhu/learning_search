@@ -27,8 +27,8 @@ class ConfigLoader {
   static Future<File?> _findConfigFile() async {
     final paths = [
       _configFileName,
-      'config/$configFileName',
-      'assets/$configFileName',
+      'config/${_configFileName}',
+      'assets/${_configFileName}',
     ];
 
     for (final path in paths) {
