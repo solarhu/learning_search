@@ -586,10 +586,9 @@ class _HomePageState extends State<HomePage> {
                           const Spacer(),
                           TextButton.icon(
                             icon: const Icon(Icons.add, size: 18),
-                            label: const Text('自定义关键词'),
+                            label: const Text('自定义关键词', style: TextStyle(fontSize: 12)),
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.blue[700],
-                              fontSize: 12,
                             ),
                             onPressed: () => _showAddCustomKeywordDialog(),
                           ),
