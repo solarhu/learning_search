@@ -387,6 +387,8 @@ class _HomePageState extends State<HomePage> {
                       ),
                       child: TextField(
                         controller: _questionController,
+                        enableInteractiveSelection: true,
+                        style: const TextStyle(fontSize: 16),
                         decoration: InputDecoration(
                           hintText: '输入你想学习的问题...',
                           border: InputBorder.none,
@@ -660,6 +662,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: TextField(
                     controller: _questionController,
+                    enableInteractiveSelection: true,
+                    style: const TextStyle(fontSize: 16),
                     decoration: InputDecoration(
                       hintText: '继续探索...',
                       border: InputBorder.none,
