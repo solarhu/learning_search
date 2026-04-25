@@ -550,7 +550,7 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               const SizedBox(height: 40),
-              if (_currentAnswer != null)
+if (_currentAnswer != null)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -561,39 +561,74 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '核心答案',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      KeywordText(
-                        text: _currentAnswer!,
-                        keywords: _currentKeywords,
-                        onKeywordTap: _onKeywordTap,
-                        onCustomSelection: _onCustomSelection,
-                      ),
-                      const SizedBox(height: 16),
                       Row(
                         children: [
                           const Text(
-                            '💡 点击蓝色关键词查看解释',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            '核心答案',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
                           ),
                           const Spacer(),
                           TextButton.icon(
-                            icon: const Icon(Icons.add, size: 18),
-                            label: const Text('自定义关键词', style: TextStyle(fontSize: 12)),
+                            icon: const Icon(Icons.add_circle_outline, size: 18),
+                            label: const Text('添加关键词'),
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.blue[700],
                             ),
-                            onPressed: () => _showAddCustomKeywordDialog(),
+                            onPressed: _showAddCustomKeywordDialog,
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '💡 选择下方文本中的词语，点击「添加关键词」按钮',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16),
+                      SelectableText(
+                        _currentAnswer!,
+                        style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      ),
+                      if (_currentKeywords.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                '关键词（点击查看解释）：',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _currentKeywords.map((keyword) {
+                                  final hasExplanation = _explanations.containsKey(keyword);
+                                  return ActionChip(
+                                    label: Text(keyword),
+                                    backgroundColor: hasExplanation
+                                        ? Colors.green[50]
+                                        : Colors.blue[50],
+                                    side: BorderSide(
+                                      color: hasExplanation
+                                          ? Colors.green[200]!
+                                          : Colors.blue[200]!,
+                                    ),
+                                    onPressed: () => _onKeywordTap(keyword),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
                       if (_explanations.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 20),
