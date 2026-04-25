@@ -387,16 +387,12 @@ class _HomePageState extends State<HomePage> {
                       ),
                       child: TextField(
                         controller: _questionController,
-                        enableInteractiveSelection: true,
-                        style: const TextStyle(fontSize: 16),
                         decoration: InputDecoration(
                           hintText: '输入你想学习的问题...',
                           border: InputBorder.none,
                           prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         ),
-                        maxLines: 2,
-                        minLines: 1,
                         textInputAction: TextInputAction.search,
                         onSubmitted: (_) => _doSearch(),
                       ),
@@ -662,16 +658,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: TextField(
                     controller: _questionController,
-                    enableInteractiveSelection: true,
-                    style: const TextStyle(fontSize: 16),
                     decoration: InputDecoration(
                       hintText: '继续探索...',
                       border: InputBorder.none,
                       prefixIcon: Icon(Icons.search, size: 20, color: Colors.grey[500]),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     ),
-                    maxLines: 2,
-                    minLines: 1,
                     textInputAction: TextInputAction.search,
                     onSubmitted: (_) => _doSearch(),
                   ),
