@@ -331,13 +331,15 @@ class _HomePageState extends State<HomePage> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // 初始界面：搜索框居中显示
+    if (_currentAnswer == null) {
+      return _buildWelcomeView();
+    }
+
+    // 搜索后：左右布局 + 底部搜索框
     return Column(
       children: [
-        Expanded(
-          child: _currentAnswer == null
-              ? _buildWelcomeView()
-              : _buildResultView(),
-        ),
+        Expanded(child: _buildResultView()),
         _buildSearchBar(),
       ],
     );
@@ -345,29 +347,83 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildWelcomeView() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.auto_stories, size: 64, color: Colors.blue),
-          const SizedBox(height: 24),
-          const Text(
-            '递进式学习搜索',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w400, color: Colors.black87),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            '输入问题，逐层深入理解',
-            style: TextStyle(fontSize: 16, color: Colors.black54),
-          ),
-          if (_isMockMode)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                '演示模式 · 输入 "openclaw是什么" 查看示例',
-                style: TextStyle(fontSize: 14, color: Colors.blue[600]),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.auto_stories, size: 56, color: Colors.blue),
+              const SizedBox(height: 20),
+              const Text(
+                '递进式学习搜索',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w400, color: Colors.black87),
               ),
-            ),
-        ],
+              const SizedBox(height: 10),
+              const Text(
+                '输入问题，逐层深入理解',
+                style: TextStyle(fontSize: 15, color: Colors.black54),
+              ),
+              if (_isMockMode)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    '演示模式 · 输入 "openclaw是什么"',
+                    style: TextStyle(fontSize: 13, color: Colors.blue[600]),
+                  ),
+                ),
+              const SizedBox(height: 32),
+              // 居中搜索框
+              Container(
+                width: MediaQuery.of(context).size.width * 0.35,
+                constraints: const BoxConstraints(minWidth: 280, maxWidth: 520),
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: TextField(
+                        controller: _questionController,
+                        decoration: InputDecoration(
+                          hintText: '输入你想学习的问题...',
+                          border: InputBorder.none,
+                          prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        ),
+                        maxLines: 2,
+                        minLines: 1,
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: (_) => _doSearch(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[600],
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            minimumSize: Size.zero,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          ),
+                          onPressed: _isLoading ? null : _doSearch,
+                          child: _isLoading
+                              ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Text('搜索', style: TextStyle(fontSize: 13)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -587,68 +643,60 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+      color: const Color(0xFFF8F9FA),
       child: Center(
         child: Container(
           width: MediaQuery.of(context).size.width * 0.35,
-          constraints: const BoxConstraints(minWidth: 300, maxWidth: 600),
+          constraints: const BoxConstraints(minWidth: 280, maxWidth: 520),
           child: Row(
             children: [
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(28),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.grey[300]!),
                   ),
                   child: TextField(
                     controller: _questionController,
                     decoration: InputDecoration(
-                      hintText: _currentAnswer == null ? '输入你想学习的问题' : '继续探索...',
+                      hintText: '继续探索...',
                       border: InputBorder.none,
-                      prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      prefixIcon: Icon(Icons.search, size: 20, color: Colors.grey[500]),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
+                    minLines: 1,
                     textInputAction: TextInputAction.search,
                     onSubmitted: (_) => _doSearch(),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Material(
-                color: Colors.blue[600],
-                borderRadius: BorderRadius.circular(24),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(24),
-                  onTap: _isLoading ? null : _doSearch,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Icon(Icons.arrow_forward, color: Colors.white),
-                  ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[600],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  minimumSize: Size.zero,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
+                onPressed: _isLoading ? null : _doSearch,
+                child: _isLoading
+                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.arrow_forward, size: 18),
               ),
               if (_currentAnswer != null)
                 Padding(
-                  padding: const EdgeInsets.only(left: 12),
+                  padding: const EdgeInsets.only(left: 8),
                   child: TextButton(
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: Size.zero,
+                    ),
                     onPressed: _resetSearch,
-                    child: Text('清空', style: TextStyle(color: Colors.grey[600])),
+                    child: Text('清空', style: TextStyle(fontSize: 13, color: Colors.grey[600])),
                   ),
                 ),
             ],
