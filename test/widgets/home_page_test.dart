@@ -1,0 +1,54 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:learning_search/main.dart';
+
+void main() {
+  group('HomePage Keyword Removal', () {
+    testWidgets('Keywords are displayed after search', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      final textField = find.widgetWithText(TextField, '输入问题进行搜索');
+      await tester.enterText(textField, 'openclaw是什么');
+
+      final searchButton = find.widgetWithText(ElevatedButton, '搜索');
+      await tester.tap(searchButton);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      expect(find.text('关键词'), findsOneWidget);
+    });
+
+    testWidgets('Remove button is visible for keywords', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      final textField = find.widgetWithText(TextField, '输入问题进行搜索');
+      await tester.enterText(textField, 'openclaw是什么');
+
+      final searchButton = find.widgetWithText(ElevatedButton, '搜索');
+      await tester.tap(searchButton);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      expect(find.byIcon(Icons.close), findsWidgets);
+    });
+
+    testWidgets('Keyword can be removed', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      final textField = find.widgetWithText(TextField, '输入问题进行搜索');
+      await tester.enterText(textField, 'openclaw是什么');
+
+      final searchButton = find.widgetWithText(ElevatedButton, '搜索');
+      await tester.tap(searchButton);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      final initialKeywordCount = tester.widgetList(find.byIcon(Icons.close)).length;
+      expect(initialKeywordCount, greaterThan(0));
+
+      final removeButton = find.byIcon(Icons.close).first;
+      await tester.tap(removeButton);
+      await tester.pumpAndSettle();
+
+      final newKeywordCount = tester.widgetList(find.byIcon(Icons.close)).length;
+      expect(newKeywordCount, lessThan(initialKeywordCount));
+    });
+  });
+}
