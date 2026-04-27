@@ -244,6 +244,14 @@ class _HomePageState extends State<HomePage> {
     _questionController.clear();
   }
 
+  void _backToSearch() {
+    setState(() {
+      _documentMarkdown = null;
+      _documentMindmap = null;
+      _currentMode = AppMode.search;
+    });
+  }
+
   void _showSettingsDialog() {
     final TextEditingController urlController = TextEditingController(
       text: _configuredApiUrl ?? '',
@@ -322,8 +330,15 @@ class _HomePageState extends State<HomePage> {
           ),
           if (_currentMode == AppMode.learning)
             IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black54),
+              onPressed: _backToSearch,
+              tooltip: '返回',
+            ),
+          if (_currentMode == AppMode.learning)
+            IconButton(
               icon: const Icon(Icons.refresh, color: Colors.black54),
               onPressed: _resetSearch,
+              tooltip: '重新搜索',
             ),
         ],
       ),

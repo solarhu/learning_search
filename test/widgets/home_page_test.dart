@@ -97,4 +97,79 @@ void main() {
       }
     });
   });
+
+  group('HomePage Document Mode', () {
+    testWidgets('Back button appears in learning mode', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      final textField = find.widgetWithText(TextField, '输入问题进行搜索');
+      await tester.enterText(textField, 'openclaw是什么');
+
+      final searchButton = find.widgetWithText(ElevatedButton, '搜索');
+      await tester.tap(searchButton);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
+
+      final generateButton = find.widgetWithText(ElevatedButton, '生成学习文档');
+      if (generateButton.evaluate().isNotEmpty) {
+        await tester.tap(generateButton);
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      }
+    });
+
+    testWidgets('Back button returns to search mode', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      final textField = find.widgetWithText(TextField, '输入问题进行搜索');
+      await tester.enterText(textField, 'openclaw是什么');
+
+      final searchButton = find.widgetWithText(ElevatedButton, '搜索');
+      await tester.tap(searchButton);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      final generateButton = find.widgetWithText(ElevatedButton, '生成学习文档');
+      if (generateButton.evaluate().isNotEmpty) {
+        await tester.tap(generateButton);
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+
+        final backButton = find.byIcon(Icons.arrow_back);
+        await tester.tap(backButton);
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.arrow_back), findsNothing);
+        expect(find.text('核心答案'), findsOneWidget);
+      }
+    });
+
+    testWidgets('Back button preserves keywords', (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      final textField = find.widgetWithText(TextField, '输入问题进行搜索');
+      await tester.enterText(textField, 'openclaw是什么');
+
+      final searchButton = find.widgetWithText(ElevatedButton, '搜索');
+      await tester.tap(searchButton);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+
+      final initialKeywordCount = tester.widgetList(find.byIcon(Icons.close)).length;
+
+      final generateButton = find.widgetWithText(ElevatedButton, '生成学习文档');
+      if (generateButton.evaluate().isNotEmpty) {
+        await tester.tap(generateButton);
+        await tester.pumpAndSettle(const Duration(seconds: 3));
+
+        final backButton = find.byIcon(Icons.arrow_back);
+        await tester.tap(backButton);
+        await tester.pumpAndSettle();
+
+        final afterBackKeywordCount = tester.widgetList(find.byIcon(Icons.close)).length;
+        expect(afterBackKeywordCount, equals(initialKeywordCount));
+      }
+    });
+  });
 }
