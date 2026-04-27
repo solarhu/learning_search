@@ -4,20 +4,24 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/you/learning_search/models"
 	"net/http"
 	"os"
 	"strings"
-	"github.com/you/learning_search/models"
 )
 
 // SearchService 搜索服务
 type SearchService struct {
-	apiKey string
+	apiKey  string
+	apiBase string
+	model   string
 }
 
 // NewSearchService 创建搜索服务
 func NewSearchService() *SearchService {
 	apiKey := ""
+	apiBase := "https://api.openai.com/v1"
+	model := "gpt-4o"
 	// 尝试从 .env 文件读取
 	if _, err := os.Stat(".env"); err == nil {
 		data, err := os.ReadFile(".env")
@@ -32,9 +36,13 @@ func NewSearchService() *SearchService {
 				if len(parts) == 2 {
 					key := strings.TrimSpace(parts[0])
 					value := strings.TrimSpace(parts[1])
-					if key == "OPENAI_API_KEY" {
+					switch key {
+					case "OPENAI_API_KEY":
 						apiKey = value
-						break
+					case "OPENAI_API_BASE":
+						apiBase = value
+					case "OPENAI_MODEL":
+						model = value
 					}
 				}
 			}
@@ -44,12 +52,19 @@ func NewSearchService() *SearchService {
 	if apiKey == "" {
 		apiKey = os.Getenv("OPENAI_API_KEY")
 	}
+	if envBase := os.Getenv("OPENAI_API_BASE"); envBase != "" {
+		apiBase = envBase
+	}
+	if envModel := os.Getenv("OPENAI_MODEL"); envModel != "" {
+		model = envModel
+	}
 	if apiKey == "" {
-		// 开发环境可以留空提示配置
 		fmt.Println("WARN: OPENAI_API_KEY not set in .env or environment")
 	}
 	return &SearchService{
-		apiKey: apiKey,
+		apiKey:  apiKey,
+		apiBase: apiBase,
+		model:   model,
 	}
 }
 
@@ -198,7 +213,7 @@ func (s *SearchService) callOpenAI(prompt string) (string, error) {
 	}
 
 	request := OpenAIRequest{
-		Model: "gpt-4o",
+		Model:       s.model,
 		Temperature: 0.7,
 	}
 	request.Messages = append(request.Messages, struct {
@@ -214,7 +229,7 @@ func (s *SearchService) callOpenAI(prompt string) (string, error) {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewReader(body))
+	req, err := http.NewRequest("POST", s.apiBase+"/chat/completions", bytes.NewReader(body))
 	if err != nil {
 		return "", err
 	}
