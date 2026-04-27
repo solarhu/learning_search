@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -31,10 +32,24 @@ class _KeywordTextState extends State<KeywordText> {
       return RichText(text: _buildTextSpan());
     }
 
-    return SelectableText.rich(
-      _buildTextSpan(),
-      style: const TextStyle(fontSize: 14, color: Colors.black87),
+    return Listener(
+      onPointerUp: (event) {
+        _captureSelection();
+      },
+      child: SelectableText.rich(
+        _buildTextSpan(),
+        style: const TextStyle(fontSize: 14, color: Colors.black87),
+      ),
     );
+  }
+
+  void _captureSelection() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      final text = getSelectedText();
+      if (text != null && text.isNotEmpty) {
+        widget.onCustomSelection(text);
+      }
+    });
   }
 
   TextSpan _buildTextSpan() {

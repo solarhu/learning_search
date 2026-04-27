@@ -59,6 +59,7 @@ class _HomePageState extends State<HomePage> {
   String? _documentMindmap;
   String? _configuredApiUrl;
   String? _expandedKeyword;
+  String? _pendingSelectedText;
 
   @override
   void initState() {
@@ -145,30 +146,20 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    try {
-      final selection = html.window.getSelection();
-      if (selection != null) {
-        final count = selection.rangeCount;
-        if (count != null && count > 0) {
-          final range = selection.getRangeAt(0);
-          final selectedText = range.toString().trim();
-          if (selectedText.isNotEmpty) {
-            setState(() {
-              if (!_currentKeywords.contains(selectedText)) {
-                _currentKeywords.add(selectedText);
-              }
-            });
-            _onKeywordTap(selectedText);
-            return;
-          }
+    if (_pendingSelectedText != null && _pendingSelectedText!.isNotEmpty) {
+      setState(() {
+        if (!_currentKeywords.contains(_pendingSelectedText)) {
+          _currentKeywords.add(_pendingSelectedText!);
         }
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先在答案中划选词语')),
-      );
-    } catch (e) {
-      _showAddKeywordDialog();
+        _pendingSelectedText = null;
+      });
+      _onKeywordTap(_currentKeywords.last);
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('请先在答案中划选词语')),
+    );
   }
 
   void _showAddKeywordDialog() {
@@ -512,10 +503,7 @@ class _HomePageState extends State<HomePage> {
                   keywords: _currentKeywords,
                   onKeywordTap: _onKeywordTap,
                   onCustomSelection: (text) {
-                    setState(() {
-                      if (!_currentKeywords.contains(text)) _currentKeywords.add(text);
-                    });
-                    _onKeywordTap(text);
+                    _pendingSelectedText = text;
                   },
                 ),
               ),
