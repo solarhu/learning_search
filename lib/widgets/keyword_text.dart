@@ -79,7 +79,7 @@ class _KeywordTextState extends State<KeywordText> {
       final selection = html.window.getSelection();
       if (selection != null) {
         final count = selection.rangeCount;
-        if (count > 0) {
+        if (count != null && count > 0) {
           final range = selection.getRangeAt(0);
           final text = range.toString().trim();
           if (text.isNotEmpty) {
