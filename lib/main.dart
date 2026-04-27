@@ -148,15 +148,19 @@ class _HomePageState extends State<HomePage> {
     try {
       final selection = html.window.getSelection();
       if (selection != null) {
-        final selectedText = selection.toString().trim();
-        if (selectedText.isNotEmpty) {
-          setState(() {
-            if (!_currentKeywords.contains(selectedText)) {
-              _currentKeywords.add(selectedText);
-            }
-          });
-          _onKeywordTap(selectedText);
-          return;
+        final count = selection.rangeCount;
+        if (count > 0) {
+          final range = selection.getRangeAt(0);
+          final selectedText = range.toString().trim();
+          if (selectedText.isNotEmpty) {
+            setState(() {
+              if (!_currentKeywords.contains(selectedText)) {
+                _currentKeywords.add(selectedText);
+              }
+            });
+            _onKeywordTap(selectedText);
+            return;
+          }
         }
       }
       ScaffoldMessenger.of(context).showSnackBar(
