@@ -147,19 +147,22 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final selection = html.window.getSelection();
-      if (selection != null && selection.toString().trim().length > 0) {
-        final selectedText = selection.toString().trim();
-        setState(() {
-          if (!_currentKeywords.contains(selectedText)) {
-            _currentKeywords.add(selectedText);
-          }
-        });
-        _onKeywordTap(selectedText);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('请先在答案中划选词语')),
-        );
+      if (selection != null && selection.rangeCount > 0) {
+        final range = selection.getRangeAt(0);
+        final selectedText = range.toString().trim();
+        if (selectedText.isNotEmpty) {
+          setState(() {
+            if (!_currentKeywords.contains(selectedText)) {
+              _currentKeywords.add(selectedText);
+            }
+          });
+          _onKeywordTap(selectedText);
+          return;
+        }
       }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请先在答案中划选词语')),
+      );
     } catch (e) {
       _showAddKeywordDialog();
     }
