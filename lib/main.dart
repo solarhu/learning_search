@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
 
     try {
       final selection = html.window.getSelection();
-      if (selection != null && selection.rangeCount > 0) {
+      if (selection != null && selection.rangeCount != null && selection.rangeCount! > 0) {
         final range = selection.getRangeAt(0);
         final selectedText = range.toString().trim();
         if (selectedText.isNotEmpty) {
