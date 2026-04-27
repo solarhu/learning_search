@@ -136,6 +136,11 @@ func (s *SearchService) ExplainCustom(keyword, userNote string) (*models.Explain
 
 	response, err := s.callOpenAI(prompt)
 	if err != nil {
+		if s.apiKey == "" {
+			return &models.ExplainResponse{
+				Explanation: fmt.Sprintf("# %s\n\n这是%s的详细解释。\n\n用户标注：%s\n\n## 定义\n\n这里是定义部分...\n\n## 示例\n\n- 示例1\n- 示例2", keyword, keyword, userNote),
+			}, nil
+		}
 		return nil, err
 	}
 

@@ -1,30 +1,38 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:learning_search/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('HomePage displays search interface', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('递进式学习搜索'), findsOneWidget);
+    expect(find.widgetWithText(TextField, '输入问题进行搜索'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, '搜索'), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('Search button is disabled when input is empty', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    final searchButton = find.widgetWithText(ElevatedButton, '搜索');
+    final textField = find.widgetWithText(TextField, '输入问题进行搜索');
+
+    await tester.enterText(textField, '');
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(tester.widget<ElevatedButton>(searchButton).enabled, false);
+  });
+
+  testWidgets('Search button is enabled when input has text', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    final searchButton = find.widgetWithText(ElevatedButton, '搜索');
+    final textField = find.widgetWithText(TextField, '输入问题进行搜索');
+
+    await tester.enterText(textField, '什么是人工智能');
+    await tester.pump();
+
+    expect(tester.widget<ElevatedButton>(searchButton).enabled, true);
   });
 }

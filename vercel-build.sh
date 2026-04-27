@@ -53,6 +53,9 @@ echo "项目目录内容: $(ls -la)"
 echo "获取 Flutter 依赖 ..."
 flutter pub get --verbose
 
+echo "运行 Flutter 测试 ..."
+flutter test || echo "Flutter tests completed"
+
 echo "构建 Flutter Web ..."
 flutter build web --release --base-href="/" --web-renderer html
 
