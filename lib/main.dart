@@ -618,6 +618,14 @@ class _HomePageState extends State<HomePage> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  if (isExpanded)
+                                    IconButton(
+                                      icon: Icon(Icons.check_box_outline_blank, size: 18, color: Colors.grey[400]),
+                                      onPressed: () => setState(() => _expandedKeyword = null),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                      tooltip: '取消选中',
+                                    ),
                                   IconButton(
                                     icon: Icon(Icons.close, size: 18, color: Colors.grey[400]),
                                     onPressed: () => _removeKeyword(keyword),
