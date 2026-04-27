@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:html' if (dart.library.io) 'stub_html.dart' as html;
+import 'dart:js_util' if (dart.library.io) 'stub_js_util.dart' as js_util;
 
 typedef KeywordTapCallback = void Function(String keyword);
 typedef CustomSelectionCallback = void Function(String selectedText);
@@ -93,13 +94,9 @@ class _KeywordTextState extends State<KeywordText> {
     try {
       final selection = html.window.getSelection();
       if (selection != null) {
-        final count = selection.rangeCount;
-        if (count != null && count > 0) {
-          final range = selection.getRangeAt(0);
-          final text = range.toString().trim();
-          if (text.isNotEmpty) {
-            return text;
-          }
+        final text = (js_util.callMethod(selection, 'toString', []) as String).trim();
+        if (text.isNotEmpty) {
+          return text;
         }
       }
     } catch (e) {
