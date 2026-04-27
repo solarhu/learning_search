@@ -66,7 +66,8 @@ class ApiConfig {
         return 'http://localhost:8081';
       }
 
-      return null;
+      // 生产环境使用相对路径（Vercel API 代理）
+      return '';
     } catch (e) {
       return null;
     }

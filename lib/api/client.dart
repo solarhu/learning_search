@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/keyword.dart';
 import 'mock_service.dart';
@@ -12,7 +13,8 @@ class ApiClient {
 
   static Future<ApiClient> create() async {
     final baseUrl = await ApiConfig.getBaseUrl();
-    final useMock = baseUrl.isEmpty;
+    // 仅在非 Web 端且无 baseUrl 时使用 Mock
+    final useMock = baseUrl.isEmpty && !kIsWeb;
     print('=== ApiClient.create: baseUrl="$baseUrl", useMock=$useMock ===');
     return ApiClient(baseUrl: baseUrl, useMock: useMock);
   }

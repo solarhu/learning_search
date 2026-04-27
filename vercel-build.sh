@@ -54,7 +54,7 @@ echo "获取 Flutter 依赖 ..."
 flutter pub get --verbose
 
 echo "构建 Flutter Web ..."
-flutter build web --release --base-href="/" --web-renderer html --dart-define=API_BASE_URL=http://47.253.106.52:18080
+flutter build web --release --base-href="/" --web-renderer html
 
 echo "构建输出目录内容:"
 ls -la build/web/
