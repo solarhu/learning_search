@@ -127,6 +127,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _removeKeyword(String keyword) {
+    setState(() {
+      _currentKeywords.remove(keyword);
+      _explanations.remove(keyword);
+      if (_expandedKeyword == keyword) {
+        _expandedKeyword = null;
+      }
+    });
+  }
+
   String _getBriefExplanation(String explanation) {
     final lines = explanation.split('\n');
     for (final line in lines) {
@@ -605,10 +615,22 @@ class _HomePageState extends State<HomePage> {
                                       overflow: TextOverflow.ellipsis)
                                   : Text('点击获取解释',
                                       style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-                              trailing: Icon(
-                                isExpanded ? Icons.expand_less : Icons.expand_more,
-                                size: 20,
-                                color: Colors.grey[600],
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.close, size: 18, color: Colors.grey[400]),
+                                    onPressed: () => _removeKeyword(keyword),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                    tooltip: '移除关键词',
+                                  ),
+                                  Icon(
+                                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                                    size: 20,
+                                    color: Colors.grey[600],
+                                  ),
+                                ],
                               ),
                               onTap: () => _onKeywordTap(keyword),
                             ),
